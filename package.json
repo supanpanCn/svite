@@ -1,0 +1,23 @@
+{
+  "name": "mini-vite",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^14.18.0 || >=16.0.0"
+  },
+  "packageManager": "pnpm@8.6.2",
+  "homepage": "https://github.com/supanpanCn/mini-vite#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supanpanCn/mini-vite.git"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter ./packages/** run dev",
+    "upgrade":"node ./scripts/upgrade.js"
+  },
+  "author": "spp",
+  "devDependencies": {
+    "@types/node": "^20.3.1",
+    "svite": "workspace:*"
+  }
+}
