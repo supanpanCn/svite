@@ -22,6 +22,7 @@
     "dev": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript"
   },
   "dependencies": {
+    "minimist": "^1.2.8",
     "rollup": "^3.21.0"
   },
   "devDependencies": {
@@ -29,7 +30,6 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "15.1.0",
     "@rollup/plugin-typescript": "^11.1.1",
-    "rimraf": "^5.0.1",
     "tslib": "^2.5.3",
     "typescript": "^5.1.3"
   },

@@ -1,0 +1,8 @@
+{
+  "name": "create-vite",
+  "version": "1.0.0",
+  "bin": "index.js",
+  "scripts": {
+    "dev": "node ./index.js --projectName vite-project"
+  }
+}
