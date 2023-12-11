@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.base.json",
   "include": [
-    "./rollup.config.ts"
+    "./rollup.config.ts",
+    "src/types/shims.d.ts",
+    "src/types/*.d.ts"
   ],
   "compilerOptions": {
     "esModuleInterop": true,

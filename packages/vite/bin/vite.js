@@ -1,1 +1,1 @@
-console.log('to do')
+import('../dist/node/cli.js')

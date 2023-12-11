@@ -54,7 +54,8 @@ const sharedNodeOptions = defineConfig({
 const config = defineConfig({
   ...sharedNodeOptions,
   input: {
-    index: path.resolve(__dirname, "src/node/index.ts")
+    index: path.resolve(__dirname, "src/node/index.ts"),
+    cli:path.resolve(__dirname, 'src/node/cli.ts'),
   },
   output: {
     ...sharedNodeOptions.output,
