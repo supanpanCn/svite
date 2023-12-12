@@ -3,7 +3,7 @@ import type { Connect } from 'dep-types/connect'
 import { resolveConfig } from '../config'
 import { createHttpServer } from '../http'
 import connect from 'connect'
-
+import { htmlFallbackMiddleware } from './middlewares/htmlFallback'
 
 export function createServer(
   config: UserConfig
@@ -37,5 +37,6 @@ async function _createServer(userConfig:UserConfig){
         return server
       }
     }
+    middlewares.use(htmlFallbackMiddleware(/\/$/))
     return server
 }

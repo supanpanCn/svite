@@ -19,8 +19,7 @@
     "node": "^14.18.0 || >=16.0.0"
   },
   "scripts": {
-    "dev": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript",
-    "start-server": "node dist/node/cli.js"
+    "dev": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript --watch"
   },
   "dependencies": {
     "rollup": "^3.21.0"

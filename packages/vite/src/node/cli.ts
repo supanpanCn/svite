@@ -1,12 +1,11 @@
 import { cac } from "cac";
 import { UserConfig } from "./index";
 
-const cli = cac("mini-vite");
+const cli = cac("svite");
 
 cli
   .command("[root]", "start dev server")
-  .alias("server")
-  .option("--port <port>", "[number] specify port")
+  .alias("serve")
   .action(loadAndCreateHttp);
 
 function normalizeConfig(option: any, root: string) {
@@ -23,7 +22,10 @@ async function loadAndCreateHttp(root: string, option: any) {
   try {
     const server = await createServer(nomalizedOption);
     await server.listen()
-  } catch (_) {
+  } catch (err) {
+    console.error(err)
     process.exit(1);
   }
 }
+
+cli.parse();
