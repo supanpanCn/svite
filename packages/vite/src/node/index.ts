@@ -9,3 +9,5 @@ export interface UserConfig {
   server: {};
   root: string;
 }
+
+export * from './config'

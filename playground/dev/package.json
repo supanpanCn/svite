@@ -1,5 +1,5 @@
 {
-  "name": "@vitejs/test-cli",
+  "name": "@vitejs/test-config",
   "private": true,
   "version": "0.0.0",
   "type": "commonjs",

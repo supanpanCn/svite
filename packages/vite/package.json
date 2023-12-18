@@ -22,6 +22,8 @@
     "dev": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript --watch"
   },
   "dependencies": {
+    "esbuild": "^0.18.8",
+    "magic-string": "^0.30.0",
     "rollup": "^3.21.0"
   },
   "devDependencies": {
@@ -32,7 +34,7 @@
     "cac": "^6.7.14",
     "connect": "^3.7.0",
     "dep-types": "link:./src/types",
-    "rimraf": "^5.0.5",
+    "rimraf": "^5.0.1",
     "tslib": "^2.5.3",
     "typescript": "^5.1.3"
   },

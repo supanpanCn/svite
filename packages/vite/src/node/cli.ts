@@ -2,7 +2,6 @@ import { cac } from "cac";
 import { UserConfig } from "./index";
 
 const cli = cac("svite");
-
 cli
   .command("[root]", "start dev server")
   .alias("serve")
@@ -21,6 +20,7 @@ async function loadAndCreateHttp(root: string, option: any) {
   const { createServer } = await import("./server");
   try {
     const server = await createServer(nomalizedOption);
+    debugger;
     await server.listen()
   } catch (err) {
     console.error(err)
