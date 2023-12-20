@@ -4,7 +4,14 @@ import { readdirSync, rmSync, mkdirSync, copyFileSync, statSync } from "fs";
 const cwd = process.cwd();
 
 function clean() {
-  const breaks = [".git", "imgs", "package.json", "scripts", "README.md"];
+  const breaks = [
+    ".git",
+    "imgs",
+    "package.json",
+    "scripts",
+    "README.md",
+    "LIST.md",
+  ];
   for (const file of readdirSync(cwd)) {
     if (breaks.find((b) => file === b)) {
       continue;
@@ -25,11 +32,7 @@ function copy(src, dest) {
 function copyDir(root, dest, first) {
   !first && mkdirSync(dest, { recursive: true });
   for (const file of readdirSync(root)) {
-    if (
-      [".git", "node_modules", ".DS_Store", "md"].find(
-        (b) => file === b
-      )
-    ) {
+    if ([".git", "node_modules", ".DS_Store", "md"].find((b) => file === b)) {
       continue;
     }
     if (file.endsWith(".md")) continue;
