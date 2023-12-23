@@ -1,9 +1,44 @@
-import { resolve } from 'node:path';
+import { resolve, isAbsolute } from 'node:path';
 import { existsSync } from 'node:fs';
 import { build } from 'esbuild';
+import { builtinModules } from 'node:module';
+import { isPackageExists, resolveModule } from 'local-pkg';
+import { pathToFileURL } from 'node:url';
 
 const DEFAULT_CONFIG_FILES = ["svite.config.ts"];
 
+const builtins = new Set([
+    ...builtinModules,
+    "assert/strict",
+    "diagnostics_channel",
+    "dns/promises",
+    "fs/promises",
+    "path/posix",
+    "path/win32",
+    "readline/promises",
+    "stream/consumers",
+    "stream/promises",
+    "stream/web",
+    "timers/promises",
+    "util/types",
+    "wasi",
+]);
+const NODE_BUILTIN_NAMESPACE = 'node:';
+function isBuiltin(id) {
+    return builtins.has(id.startsWith(NODE_BUILTIN_NAMESPACE)
+        ? id.slice(NODE_BUILTIN_NAMESPACE.length)
+        : id);
+}
+
+async function analizePathValue(id) {
+    if (isPackageExists(id)) {
+        const fileUrl = resolveModule(id);
+        if (fileUrl) {
+            return pathToFileURL(fileUrl).href;
+        }
+    }
+    return "";
+}
 async function buildBoundle(fileName) {
     const result = await build({
         absWorkingDir: process.cwd(),
@@ -17,6 +52,22 @@ async function buildBoundle(fileName) {
         mainFields: ["main"],
         sourcemap: "inline",
         metafile: false,
+        plugins: [
+            {
+                name: "externalize-deps",
+                setup(build) {
+                    build.onResolve({ filter: /^[^.].*/ }, async ({ path: id, importer, kind }) => {
+                        if (kind === "entry-point" || isAbsolute(id) || isBuiltin(id)) {
+                            return null;
+                        }
+                        return {
+                            path: await analizePathValue(id),
+                            external: true,
+                        };
+                    });
+                },
+            },
+        ],
     });
     const { text } = result.outputFiles[0];
     return text;

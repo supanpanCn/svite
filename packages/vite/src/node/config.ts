@@ -1,8 +1,21 @@
 import type { UserConfig } from "./index";
-import { resolve } from "node:path";
+import { resolve, isAbsolute } from "node:path";
 import { existsSync } from "node:fs";
 import { build } from "esbuild";
 import { DEFAULT_CONFIG_FILES } from "./constants";
+import { isBuiltin } from "./utils";
+import { isPackageExists, resolveModule } from "local-pkg";
+import { pathToFileURL } from "node:url";
+
+async function analizePathValue(id: string) {
+  if (isPackageExists(id)) {
+    const fileUrl = resolveModule(id);
+    if (fileUrl) {
+      return pathToFileURL(fileUrl).href;
+    }
+  }
+  return "";
+}
 
 async function buildBoundle(fileName: string) {
   const result = await build({
@@ -17,6 +30,25 @@ async function buildBoundle(fileName: string) {
     mainFields: ["main"],
     sourcemap: "inline",
     metafile: false,
+    plugins: [
+      {
+        name: "externalize-deps",
+        setup(build) {
+          build.onResolve(
+            { filter: /^[^.].*/ },
+            async ({ path: id, importer, kind }) => {
+              if (kind === "entry-point" || isAbsolute(id) || isBuiltin(id)) {
+                return null;
+              }
+              return {
+                path: await analizePathValue(id),
+                external: true,
+              };
+            }
+          );
+        },
+      },
+    ],
   });
   const { text } = result.outputFiles[0];
   return text;

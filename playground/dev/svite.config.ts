@@ -1,4 +1,5 @@
-import { name } from './other'
-export default {
-    name
-}
+import { defineConfig } from 'svite'
+export default defineConfig({
+    server:{},
+    root:''
+})
