@@ -13,7 +13,7 @@
     ".": {
       "types": "./dist/node/index.d.ts",
       "import": "./dist/node/index.js",
-      "require": "./dist/node/index.js"
+      "require":"./dist/node/index.js"
     }
   },
   "engines": {
@@ -36,7 +36,6 @@
     "cac": "^6.7.14",
     "connect": "^3.7.0",
     "dep-types": "link:./src/types",
-    "rimraf": "^5.0.5",
     "tslib": "^2.5.3",
     "typescript": "^5.1.3"
   },

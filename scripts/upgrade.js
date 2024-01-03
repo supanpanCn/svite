@@ -32,7 +32,7 @@ function copy(src, dest) {
 function copyDir(root, dest, first) {
   !first && mkdirSync(dest, { recursive: true });
   for (const file of readdirSync(root)) {
-    if ([".git", "node_modules", ".DS_Store", "md"].find((b) => file === b)) {
+    if ([".git", "node_modules", ".DS_Store", "md","LIST.md",""].find((b) => file === b)) {
       continue;
     }
     if (file.endsWith(".md")) continue;

@@ -4,6 +4,7 @@ import { resolveConfig } from '../config'
 import { createHttpServer } from '../http'
 import connect from 'connect'
 import { htmlFallbackMiddleware } from './middlewares/htmlFallback'
+import { createPluginContainer } from './pluginContainer'
 
 export function createServer(
   config: UserConfig
@@ -29,8 +30,10 @@ async function _createServer(userConfig:UserConfig){
     const config = await resolveConfig(userConfig)
     const middlewares = connect() as Connect.Server
     const httpServer = await createHttpServer(middlewares)
+    const container = await createPluginContainer(config.plugins)
     const server:ViteDevServer = {
       config,
+      pluginContainer:container,
       httpServer,
       async listen(){
         await startServer(server)

@@ -1,1 +1,1 @@
-export const DEFAULT_CONFIG_FILES = ["svite.config.ts"];
+export const DEFAULT_CONFIG_FILES = ["svite.config.js"];

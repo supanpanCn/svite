@@ -1,5 +1,10 @@
 import { defineConfig } from 'svite'
+
 export default defineConfig({
-    server:{},
-    root:''
+    plugins:[{
+        enforce:'pre',
+        load(){
+            debugger
+        }
+    }]
 })
