@@ -4,7 +4,6 @@ export default defineConfig({
     plugins:[{
         enforce:'pre',
         load(){
-            debugger
         }
     }]
 })

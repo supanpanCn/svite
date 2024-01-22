@@ -5,6 +5,7 @@ import { createHttpServer } from '../http'
 import connect from 'connect'
 import { htmlFallbackMiddleware } from './middlewares/htmlFallback'
 import { createPluginContainer } from './pluginContainer'
+import { initDepsOptimizer } from '../optimizer/optimizer'
 
 export function createServer(
   config: UserConfig
@@ -36,6 +37,7 @@ async function _createServer(userConfig:UserConfig){
       pluginContainer:container,
       httpServer,
       async listen(){
+        await initDepsOptimizer(server,config)
         await startServer(server)
         return server
       }

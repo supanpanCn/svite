@@ -13,7 +13,7 @@
     ".": {
       "types": "./dist/node/index.d.ts",
       "import": "./dist/node/index.js",
-      "require":"./dist/node/index.js"
+      "require": "./dist/node/index.js"
     }
   },
   "engines": {
@@ -23,6 +23,7 @@
     "dev": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript --watch"
   },
   "dependencies": {
+    "es-module-lexer": "^1.3.0",
     "esbuild": "^0.18.8",
     "local-pkg": "^0.4.3",
     "magic-string": "^0.30.0",

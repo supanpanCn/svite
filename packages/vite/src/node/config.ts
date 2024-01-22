@@ -141,6 +141,7 @@ export async function resolveConfig(userConf: UserConfig) {
   const resolved: ResolvedConfig = {
     ...conf,
     ...userConfig,
+    cacheDir:'node_modules',
     plugins: await resolvePlugins(conf.plugins || []),
   };
   return resolved;

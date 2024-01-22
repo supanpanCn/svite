@@ -7,7 +7,7 @@ cli
   .alias("serve")
   .action(loadAndCreateHttp);
 
-function normalizeConfig(option: any, root: string) {
+function normalizeConfig(option: any, root: string = process.cwd()) {
   const config = {
     server: {},
     root,
@@ -20,7 +20,6 @@ async function loadAndCreateHttp(root: string, option: any) {
   const { createServer } = await import("./server");
   try {
     const server = await createServer(nomalizedOption);
-    debugger;
     await server.listen()
   } catch (err) {
     console.error(err)

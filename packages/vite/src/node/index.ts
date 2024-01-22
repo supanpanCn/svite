@@ -11,7 +11,15 @@ export interface ViteDevServer {
 export interface UserConfig {
   server?: {};
   root?: string;
-  plugins?:UserPlugin[]
+  cacheDir?:string;
+  plugins?:UserPlugin[];
+  optimizeDeps?:{
+    entries?:string[];
+    force?:boolean;
+  };
+  build?:{
+    input?:string[]
+  }
 }
 
 export * from './config'

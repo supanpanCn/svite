@@ -14,7 +14,7 @@ function normalizeConfig(option, root) {
 }
 async function loadAndCreateHttp(root, option) {
     const nomalizedOption = normalizeConfig(option, root);
-    const { createServer } = await import('./chunks/dep-7876838f.js');
+    const { createServer } = await import('./chunks/dep-5ac2f233.js');
     try {
         const server = await createServer(nomalizedOption);
         debugger;

@@ -1,0 +1,12 @@
+{
+  "name": "@vitejs/test-cli",
+  "private": true,
+  "version": "0.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "server": "svite"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
