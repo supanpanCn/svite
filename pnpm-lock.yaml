@@ -163,6 +163,15 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
 
+  playground/resolve:
+    dependencies:
+      axios:
+        specifier: ^1.4.0
+        version: 1.4.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+
 packages:
 
   /@aashutoshrathi/word-wrap@1.2.6:

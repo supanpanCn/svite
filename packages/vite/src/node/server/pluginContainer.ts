@@ -6,7 +6,13 @@ type NullValue = null | undefined | void;
 
 export interface PluginContainer {
   buildStart(): Promise<void>;
-  resolveId(id: string, importer?: string): Promise<string | NullValue>;
+  resolveId(
+    id: string,
+    importer?: string,
+    options?: {
+      scan?: boolean;
+    }
+  ): Promise<string | NullValue>;
   transform(code: string, id: string): Promise<{ code: string }>;
   load(id: string): Promise<string | NullValue>;
 }
@@ -49,7 +55,7 @@ export async function createPluginContainer(
   class Context {
     _activePlugin: Plugin | null = null;
     _activeId: string = "";
-    _activeCode:string="";
+    _activeCode: string = "";
     constructor(initialPlugin?: Plugin) {
       this._activePlugin = initialPlugin || null;
     }
@@ -65,7 +71,7 @@ export async function createPluginContainer(
         )
       );
     },
-    async resolveId(rawId, importer) {
+    async resolveId(rawId, importer, options) {
       const ctx = new Context();
       let overrideId: string | undefined;
       for (const plugin of getSortedPlugins("resolveId")) {
@@ -73,7 +79,7 @@ export async function createPluginContainer(
         ctx._activePlugin = plugin;
         const hook = plugin.resolveId!;
         const result = await handleHookPromise(
-          hook.call(ctx as any, rawId, importer)
+          hook.call(ctx as any, rawId, importer, options)
         );
         if (!result) continue;
         overrideId = result;
@@ -95,24 +101,22 @@ export async function createPluginContainer(
         code = result;
       }
       return {
-        code
+        code,
       };
     },
     async load(id) {
-        const ctx = new Context()
-        for (const plugin of getSortedPlugins('load')) {
-          if (!plugin.load) continue
-          ctx._activePlugin = plugin
-          const hook = plugin.load!;
-          const result = await handleHookPromise(
-            hook.call(ctx as any, id),
-          )
-          if (result != null) {
-            return result
-          }
+      const ctx = new Context();
+      for (const plugin of getSortedPlugins("load")) {
+        if (!plugin.load) continue;
+        ctx._activePlugin = plugin;
+        const hook = plugin.load!;
+        const result = await handleHookPromise(hook.call(ctx as any, id));
+        if (result != null) {
+          return result;
         }
-        return null
-      },
+      }
+      return null;
+    },
   };
   return container;
 }

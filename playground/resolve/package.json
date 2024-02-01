@@ -1,0 +1,15 @@
+{
+  "name": "@vitejs/test-cli",
+  "private": true,
+  "version": "0.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "server": "svite"
+  },
+  "imports":{
+    "#c":"./src/components/c.js"
+  },
+  "dependencies": {
+    "axios": "^1.4.0"
+  }
+}

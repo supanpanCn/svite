@@ -1,6 +1,6 @@
 import { type ResolvedConfig } from "../config";
 import esbuild, { type BuildContext, type Plugin, type Loader } from "esbuild";
-import { normalizePath, isInNodeModules } from "../utils";
+import { normalizePath, isInNodeModules,normalizePath_r } from "../utils";
 import {
   scriptRE,
   dataUrlRE,
@@ -11,6 +11,7 @@ import {
 } from "../constants";
 import { resolve, extname } from "node:path";
 import { readFileSync, existsSync } from "node:fs";
+import { createPluginContainer } from '../server/pluginContainer'
 
 function computeEntries(config: ResolvedConfig) {
   const _getPath = (arr: string[]) =>
@@ -27,21 +28,17 @@ function computeEntries(config: ResolvedConfig) {
   return entries;
 }
 
-function esbuildScanPlugin(deps: Record<string, string>): Plugin {
-  const _resolver = (id: string) => {
-    let absPath = resolve(id);
-    if (existsSync(absPath)) {
-      return absPath;
-    }
-    absPath = resolve("node_modules", id, "package.json");
-    if (existsSync(absPath)) {
-      const code = readFileSync(absPath, "utf-8");
-      if (code) {
-        const { main } = JSON.parse(code);
-        return resolve(absPath, "..", main);
+async function esbuildScanPlugin(deps: Record<string, string>,config:ResolvedConfig): Promise<Plugin> {
+  const container = await createPluginContainer(config.plugins);
+  const _resolver = async (id: string, importer?: string) => {
+    const resolved = await container.resolveId(
+      id,
+      importer && normalizePath_r(importer),
+      {
+        scan: true,
       }
-    }
-    return id;
+    );
+    return resolved;
   };
   return {
     name: "vite:dep-scan",
@@ -103,8 +100,8 @@ function esbuildScanPlugin(deps: Record<string, string>): Plugin {
         {
           filter: /^[\w@][^:]/,
         },
-        ({ path: id }) => {
-          const resolved = _resolver(id);
+        async ({ path: id ,importer}) => {
+          const resolved = await _resolver(id,importer) as string;
 
           if (existsSync(resolved) && isInNodeModules(resolved)) {
             deps[id] = resolved;
@@ -124,8 +121,8 @@ function esbuildScanPlugin(deps: Record<string, string>): Plugin {
         {
           filter: /.*/,
         },
-        ({ path: id }) => {
-          const resolved = _resolver(id);
+        async ({ path: id,importer }) => {
+          const resolved = await _resolver(id,importer) as string;
           if (existsSync(resolved)) {
             return {
               path: resolved,
@@ -157,7 +154,7 @@ async function prepareEsbuildScanner(
   entries: string[],
   deps: Record<string, string>
 ): Promise<BuildContext | undefined> {
-  const plugin: Plugin = esbuildScanPlugin(deps);
+  const plugin: Plugin = await esbuildScanPlugin(deps,config);
 
   return await esbuild.context({
     absWorkingDir: process.cwd(),

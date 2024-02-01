@@ -1,12 +1,23 @@
 import type { Plugin } from "../plugin";
-import type { PluginHookUtils } from "../config";
+import type { PluginHookUtils, ResolvedConfig } from "../config";
+import { resolvePlugin } from "./resolver";
+import { getDepsOptimizer } from "../optimizer/optimizer";
 
 export async function resolvePlugins(
+  config: ResolvedConfig,
   prePlugins: Plugin[],
   normalPlugins: Plugin[],
   postPlugins: Plugin[]
 ): Promise<Plugin[]> {
-  return [...prePlugins, ...normalPlugins, ...postPlugins];
+  return [
+    ...prePlugins,
+    resolvePlugin({
+      config,
+      getDepsOptimizer: () => getDepsOptimizer(config),
+    }),
+    ...normalPlugins,
+    ...postPlugins,
+  ];
 }
 
 export function getSortedPluginsByHook(

@@ -1,8 +1,8 @@
 import { type ResolvedConfig } from "../config";
 import esbuild, { type BuildContext, type Plugin } from "esbuild";
-import { formatPath, getHash, safeRename, isWindows } from "../utils";
+import { formatPath, getHash, safeRename, isWindows ,normalizePath_r} from "../utils";
 import { resolve, relative, join } from "node:path";
-import { mkdirSync, writeFileSync, existsSync, renameSync, rm } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync, renameSync } from "node:fs";
 import { initDepsOptimizerMetadata, flattenId } from "./index";
 import {
   ESBUILD_MODULES_TARGET,
@@ -10,8 +10,14 @@ import {
   jsExtensionRE,
   jsMapExtensionRE,
 } from "../constants";
-import { processMetaData } from "./index";
+import {
+  processMetaData,
+  getOptimizedDepPath,
+  findOptimizedDepInfoInRecord,
+  type OptimizedDepInfo,
+} from "./index";
 import fsp from "node:fs/promises";
+import { createPluginContainer } from '../server/pluginContainer'
 
 export type ExportsData = {
   hasImports: boolean;
@@ -33,7 +39,10 @@ const externalWithConversionNamespace =
   "svite:dep-pre-bundle:external-conversion";
 const convertedExternalPrefix = "svite-dep-pre-bundle-external:";
 
-export function getDepsCacheDir(config: ResolvedConfig, isTemp?: boolean): string {
+export function getDepsCacheDir(
+  config: ResolvedConfig,
+  isTemp?: boolean
+): string {
   let base = formatPath(resolve(config.cacheDir!, ".deps"));
   if (isTemp) {
     base +=
@@ -47,9 +56,17 @@ export function getDepsCacheDir(config: ResolvedConfig, isTemp?: boolean): strin
   return base;
 }
 
-function esbuildDepPlugin(deps: Record<string, string> = {}): Plugin {
-  const _resolver = (id: string) => {
-    return id;
+async function esbuildDepPlugin(deps: Record<string, string> = {},config:ResolvedConfig): Promise<Plugin> {
+  const container = await createPluginContainer(config.plugins);
+  const _resolver = async (id: string, importer?: string) => {
+    const resolved = await container.resolveId(
+      id,
+      importer && normalizePath_r(importer),
+      {
+        scan: true,
+      }
+    );
+    return resolved;
   };
   return {
     name: "vite:dep-pre-bundle",
@@ -67,7 +84,7 @@ function esbuildDepPlugin(deps: Record<string, string> = {}): Plugin {
               external: true,
             };
           }
-          const resolved = _resolver(id);
+          const resolved = await _resolver(id,importer);
           if (resolved) {
             if (kind === "require-call") {
               return {
@@ -105,7 +122,7 @@ function esbuildDepPlugin(deps: Record<string, string> = {}): Plugin {
             };
           }
 
-          const resolved = _resolver(id);
+          const resolved = await _resolver(id,importer);
           if (resolved) {
             return {
               path: resolved,
@@ -119,18 +136,18 @@ function esbuildDepPlugin(deps: Record<string, string> = {}): Plugin {
 
 async function prepareEsbuildOptimizerRun(
   config: ResolvedConfig,
-  deps: Record<string, string>,
+  deps: Record<string, OptimizedDepInfo>,
   processingCacheDir: string
 ): Promise<{
   context?: BuildContext;
 }> {
   const flatIdDeps: Record<string, string> = {};
   Object.keys(deps).map(async (id) => {
-    const src = deps[id]!;
+    const src = deps[id].src!;
     const flatId = flattenId(id);
     flatIdDeps[flatId] = src;
   });
-
+  const plugin:Plugin = await esbuildDepPlugin(flatIdDeps,config)
   const context = await esbuild.context({
     absWorkingDir: process.cwd(),
     entryPoints: Object.keys(flatIdDeps),
@@ -144,7 +161,7 @@ async function prepareEsbuildOptimizerRun(
     outdir: processingCacheDir,
     ignoreAnnotations: true,
     metafile: true,
-    plugins: [esbuildDepPlugin(flatIdDeps)],
+    plugins: [plugin],
     charset: "utf8",
     supported: {
       "dynamic-import": true,
@@ -158,7 +175,7 @@ async function prepareEsbuildOptimizerRun(
 
 export async function preBoundle(
   config: ResolvedConfig,
-  deps: Record<string, string>
+  deps: Record<string, OptimizedDepInfo>
 ) {
   const depsCacheDir = getDepsCacheDir(config);
   const processingCacheDir = getDepsCacheDir(config, true);
@@ -183,7 +200,7 @@ export async function preBoundle(
       const meta = result.metafile!;
       for (const id in deps) {
         processMetaData(metadata, "optimized", {
-          [`${id}`]: deps[id],
+          ...deps[id],
         });
       }
 
@@ -193,9 +210,18 @@ export async function preBoundle(
             jsExtensionRE,
             ""
           );
-          processMetaData(metadata, "chunks", {
-            id,
-          });
+          const file = getOptimizedDepPath(id, config);
+          if (
+            !findOptimizedDepInfoInRecord(
+              metadata.optimized,
+              (depInfo) => depInfo.file === file
+            )
+          ) {
+            processMetaData(metadata, "chunks", {
+              id,
+              file,
+            });
+          }
         }
       }
 

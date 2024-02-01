@@ -1,6 +1,5 @@
 import { type ResolvedConfig } from "../config";
 import { scanImports } from "./scan";
-import type { AnyObj } from "../../types/helper";
 import { preBoundle } from "./build";
 import {
   replaceSlashOrColonRE,
@@ -9,9 +8,31 @@ import {
   replaceHashRE,
   lockfileFormats,
 } from "../constants";
-import { lookupFile, tryStatSync, getHash } from "../utils";
+import { lookupFile, tryStatSync, getHash, normalizePath_r } from "../utils";
 import { readFileSync } from "node:fs";
 import { basename, join, dirname } from "node:path";
+import { resolve } from "node:path";
+import { getDepsCacheDir } from "./build";
+
+export interface OptimizedDepInfo {
+  // 引入的包名称
+  file: string;
+  // 指向node_modules中指定依赖项的文件地址
+  src?: string;
+}
+
+export interface DepOptimizationMetadata {
+  hash: string;
+  discovered: Record<string, OptimizedDepInfo>;
+  chunks: Record<string, OptimizedDepInfo>;
+  optimized: Record<string, OptimizedDepInfo>;
+  depInfoList: OptimizedDepInfo[];
+}
+export interface DepsOptimizer {
+  metadata: DepOptimizationMetadata;
+  scanProcessing?: Promise<void>;
+  isOptimizedDepFile:(id:string)=>boolean;
+}
 
 export function discoverProjectDependencies(config: ResolvedConfig): {
   cancel: () => Promise<void>;
@@ -29,7 +50,7 @@ export function discoverProjectDependencies(config: ResolvedConfig): {
 
 export function runOptimizeDeps(
   config: ResolvedConfig,
-  deps: Record<string, string>
+  deps: Record<string, OptimizedDepInfo>
 ) {
   config = {
     ...config,
@@ -57,7 +78,7 @@ export function getDepHash(config: ResolvedConfig): string {
   }
   content += JSON.stringify(
     {
-      entrys:config.optimizeDeps?.entries || []
+      entrys: config.optimizeDeps?.entries || [],
     },
     (_, value) => {
       if (typeof value === "function" || value instanceof RegExp) {
@@ -75,16 +96,55 @@ export function initDepsOptimizerMetadata(config: ResolvedConfig) {
     discovered: {},
     chunks: {},
     optimized: {},
+    depInfoList:[]
   };
 }
 
-export function processMetaData<T extends AnyObj, K extends keyof T>(
-  target: T,
-  key: K,
-  value: any
+export function getOptimizedDepPath(
+  id: string,
+  config: ResolvedConfig
+): string {
+  return normalizePath_r(
+    resolve(getDepsCacheDir(config, false), flattenId(id) + ".js")
+  );
+}
+
+export function findOptimizedDepInfoInRecord(
+  dependenciesInfo: Record<string, OptimizedDepInfo>,
+  callbackFn: (depInfo: OptimizedDepInfo, id: string) => any,
+): OptimizedDepInfo | undefined {
+  for (const o of Object.keys(dependenciesInfo)) {
+    const info = dependenciesInfo[o]
+    if (callbackFn(info, o)) {
+      return info
+    }
+  }
+}
+
+export function processMetaData(
+  target: DepOptimizationMetadata,
+  key: 'discovered' | 'optimized' | 'chunks',
+  payload: any
 ) {
-  const valueIsFunction = typeof value === "function";
-  target[key] = valueIsFunction ? value(target[key]) : value;
+  switch (key) {
+    case "discovered": {
+      const { id, resolved, config } = payload;
+      const item = {
+        id,
+        src: normalizePath_r(resolved),
+        file: getOptimizedDepPath(id, config),
+      };
+      target[key][item.id] = item;
+      target.depInfoList.push(item);
+      break;
+    }
+    case 'optimized':
+    case 'chunks':{
+      target[key][payload.id] = payload;
+      target.depInfoList.push(payload);
+      break
+    }
+  }
 }
 
 export const flattenId = (id: string): string =>

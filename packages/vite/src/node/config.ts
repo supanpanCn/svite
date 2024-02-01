@@ -4,13 +4,16 @@ import { resolve, isAbsolute } from "node:path";
 import { existsSync } from "node:fs";
 import { build } from "esbuild";
 import { DEFAULT_CONFIG_FILES } from "./constants";
-import { isBuiltin, asyncFlatten } from "./utils";
+import { isBuiltin, asyncFlatten,normalizePath_r } from "./utils";
 import { isPackageExists, resolveModule } from "local-pkg";
 import { pathToFileURL } from "node:url";
 import { resolvePlugins as mergePlugins } from './plugins'
+import { AnyObj } from '../types/helper'
+import { findNearestPackageData } from './packages'
 
 export type ResolvedConfig = Readonly<Omit<UserConfig, "plugins">> & {
-  plugins: readonly Plugin[];
+  plugins: Plugin[];
+  packageCache:AnyObj;
 };
 
 export interface PluginHookUtils {
@@ -80,12 +83,12 @@ async function loadConfigFromBoundled(code: string, resolvedPath: string) {
   ).default;
 }
 
-async function resolvePlugins(userPlugins: Plugin[]) {
+async function resolvePlugins(config:ResolvedConfig) {
+  const userPlugins = config.plugins || []
   const formattedPlugins = await asyncFlatten<Plugin>(userPlugins);
   const [prePlugins, normalPlugins, postPlugins] =
     sortUserPlugins(formattedPlugins);
-  return await mergePlugins(prePlugins,normalPlugins,postPlugins)
-
+  return await mergePlugins(config,prePlugins,normalPlugins,postPlugins)
 }
 
 export function sortUserPlugins(
@@ -131,7 +134,13 @@ export async function parseConfigFile(conf: object) {
   return {};
 }
 
+
+
 export async function resolveConfig(userConf: UserConfig) {
+  const resolvedRoot = normalizePath_r(
+    userConf.root ? resolve(userConf.root) : process.cwd(),
+  )
+  const packageCache: AnyObj = findNearestPackageData(resolvedRoot)
   const internalConf = {};
   const conf = {
     ...userConf,
@@ -142,7 +151,9 @@ export async function resolveConfig(userConf: UserConfig) {
     ...conf,
     ...userConfig,
     cacheDir:'node_modules',
-    plugins: await resolvePlugins(conf.plugins || []),
+    plugins: [],
+    packageCache
   };
+  resolved.plugins = await resolvePlugins(resolved)
   return resolved;
 }

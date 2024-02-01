@@ -5,7 +5,12 @@ type PluginContext = any;
 
 type TransformPluginContext = any;
 
+type NullValue = null | undefined | void;
+type ResolveIdResult = string | NullValue | false;
+
 export interface Plugin {
+  // 插件名称
+  name:string;
   // 指定在所有插件中的运行阶段
   enforce?: "pre" | "post";
   // 是否等待前一个plugin hook执行完毕
@@ -15,9 +20,12 @@ export interface Plugin {
   // 路径解析
   resolveId?: (
     this: PluginContext,
-    source: string,
-    importer: string | undefined
-  ) => Promise<string> | string | undefined;
+    id:string,
+    importer: string | undefined,
+    options?:{
+      scan?:boolean;
+    }
+  ) => Promise<ResolveIdResult> | ResolveIdResult;
   // 模块加载
   load?: (this: PluginContext, id: string) => Promise<LoadResult> | LoadResult;
   // 模块转换
