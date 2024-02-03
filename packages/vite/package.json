@@ -27,6 +27,8 @@
     "esbuild": "^0.18.8",
     "local-pkg": "^0.4.3",
     "magic-string": "^0.30.0",
+    "mlly": "^1.4.0",
+    "resolve.exports": "^2.0.2",
     "rollup": "^3.21.0"
   },
   "devDependencies": {

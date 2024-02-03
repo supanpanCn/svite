@@ -6,10 +6,11 @@
   "scripts": {
     "server": "svite"
   },
-  "imports":{
-    "#c":"./src/components/c.js"
+  "imports": {
+    "#c": "./src/components/c.js"
   },
   "dependencies": {
-    "axios": "^1.4.0"
+    "lodash": "^4.17.21",
+    "web-localstorage-plus": "^0.0.15"
   }
 }

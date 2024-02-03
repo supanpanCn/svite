@@ -116,3 +116,5 @@ export const windowsSlashRE = /\\/g;
 export const windowsDrivePathPrefixRE = /^[A-Za-z]:[/\\]/
 
 export const bareImportRE = /^(?![a-zA-Z]:)[\w@](?!.*:\/\/)/
+
+export const deepImportRE = /^([^@][^/]*)\/|^(@[^/]+\/[^/]+)\//

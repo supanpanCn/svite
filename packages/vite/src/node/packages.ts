@@ -1,14 +1,19 @@
 import { join, dirname } from "node:path";
 import { statSync, readFileSync } from "node:fs";
-import { AnyObj } from "../types/helper";
+import { AnyObj } from "dep-types/helper";
+import { normalizePath_r } from './utils'
 
-export function findNearestPackageData(basedir: string): AnyObj {
+export function findNearestPackageData(basedir: string,pkgName?:string): AnyObj | null {
   while (basedir) {
-    const pkgPath = join(basedir, "package.json");
+    const paths = [basedir,pkgName?'node_modules':'',pkgName || '',"package.json"].filter(v=>v)
+    const pkgPath = join(...paths);
     try {
       if (statSync(pkgPath, { throwIfNoEntry: false })?.isFile()) {
         const pkgData = JSON.parse(readFileSync(pkgPath, "utf-8"));
-        return pkgData;
+        return {
+          ...pkgData,
+          pkgDir:normalizePath_r(dirname(pkgPath))
+        };
       }
     } catch {}
 
@@ -17,5 +22,5 @@ export function findNearestPackageData(basedir: string): AnyObj {
     basedir = nextBasedir;
   }
 
-  return {};
+  return null;
 }

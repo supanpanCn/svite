@@ -15,3 +15,5 @@ console.log(
   ),
   b
 );
+
+b(false)

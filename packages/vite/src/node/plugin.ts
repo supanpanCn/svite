@@ -1,4 +1,4 @@
-type LoadResult = null | string;
+type LoadResult = string | NullValue;
 type TransformResult = null | string;
 
 type PluginContext = any;

@@ -32,6 +32,7 @@ export interface DepsOptimizer {
   metadata: DepOptimizationMetadata;
   scanProcessing?: Promise<void>;
   isOptimizedDepFile:(id:string)=>boolean;
+  registerMissingImport:(id:string,resolved:string)=>OptimizedDepInfo;
 }
 
 export function discoverProjectDependencies(config: ResolvedConfig): {
@@ -136,13 +137,13 @@ export function processMetaData(
       };
       target[key][item.id] = item;
       target.depInfoList.push(item);
-      break;
+      return item;
     }
     case 'optimized':
     case 'chunks':{
       target[key][payload.id] = payload;
       target.depInfoList.push(payload);
-      break
+      return payload
     }
   }
 }

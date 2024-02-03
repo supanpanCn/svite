@@ -140,7 +140,7 @@ export async function resolveConfig(userConf: UserConfig) {
   const resolvedRoot = normalizePath_r(
     userConf.root ? resolve(userConf.root) : process.cwd(),
   )
-  const packageCache: AnyObj = findNearestPackageData(resolvedRoot)
+  const packageCache: AnyObj = findNearestPackageData(resolvedRoot) || {}
   const internalConf = {};
   const conf = {
     ...userConf,
