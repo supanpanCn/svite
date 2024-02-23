@@ -171,9 +171,12 @@ importers:
 
   playground/resolve:
     dependencies:
-      axios:
-        specifier: ^1.4.0
-        version: 1.4.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      web-localstorage-plus:
+        specifier: ^0.0.15
+        version: 0.0.15
 
 packages:
 
@@ -4133,6 +4136,10 @@ packages:
     resolution: {integrity: sha512-dbjHLhRSqjWm33picF5+qh1Fc9uRXtNnWvUseSEewxNmlrtxVtmUrc4L7oSujdRe6uLCbPEhXXd0kOFUpEQjFQ==}
     dependencies:
       lodash-es: 4.17.21
+    dev: false
+
+  /web-localstorage-plus@0.0.15:
+    resolution: {integrity: sha512-Q82CTPsfWnNOiO0YoPswEiFi2wBiphyzBaRo1agrzSJbecDejN0C5oNTyqxLXSqvBIrFzkcSp2EWd64s0muHlA==}
     dev: false
 
   /webpack-sources@3.2.3:
