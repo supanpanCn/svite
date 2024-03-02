@@ -1,6 +1,7 @@
 import type * as http from "node:http";
 import type { PluginContainer } from './server/pluginContainer'
 import type { Plugin as UserPlugin } from './plugin'
+import { AnyObj } from "./types";
 export interface ViteDevServer {
   config: any;
   httpServer: http.Server | null;
@@ -9,6 +10,9 @@ export interface ViteDevServer {
 }
 
 export interface UserConfig {
+  base?:string;
+  define?:AnyObj;
+  mode?:string;
   server?: {};
   root?: string;
   cacheDir?:string;

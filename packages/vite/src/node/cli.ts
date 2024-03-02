@@ -1,5 +1,6 @@
 import { cac } from "cac";
 import { UserConfig } from "./index";
+import { AnyObj } from "./types";
 
 const cli = cac("svite");
 cli
@@ -7,10 +8,12 @@ cli
   .alias("serve")
   .action(loadAndCreateHttp);
 
-function normalizeConfig(option: any, root: string = process.cwd()) {
+function normalizeConfig(option: AnyObj, root: string = process.cwd()) {
   const config = {
     server: {},
     root,
+    mode:'development',
+    ...(option || {}),
   };
   return config satisfies UserConfig;
 }

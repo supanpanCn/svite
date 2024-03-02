@@ -1,0 +1,16 @@
+{
+  "name": "@vitejs/test-cli",
+  "private": true,
+  "version": "0.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "server": "svite"
+  },
+  "imports": {
+    "#c": "./src/components/c.js"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "web-localstorage-plus": "^0.0.15"
+  }
+}

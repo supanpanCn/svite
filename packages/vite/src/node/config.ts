@@ -8,12 +8,19 @@ import { isBuiltin, asyncFlatten,normalizePath_r } from "./utils";
 import { isPackageExists, resolveModule } from "local-pkg";
 import { pathToFileURL } from "node:url";
 import { resolvePlugins as mergePlugins } from './plugins'
-import { AnyObj } from '../types/helper'
+import { AnyObj } from './types'
 import { findNearestPackageData } from './packages'
+import { loadEnv } from './env'
 
 export type ResolvedConfig = Readonly<Omit<UserConfig, "plugins">> & {
   plugins: Plugin[];
   packageCache:AnyObj;
+  env:{
+    BASE_URL:string;
+    MODE:string;
+    DEV:boolean;
+    PROD:boolean;
+  };
 };
 
 export interface PluginHookUtils {
@@ -116,7 +123,7 @@ export function defineConfig(config: UserConfig): UserConfig {
 export async function parseConfigFile(conf: object) {
   let resolvedPath: string | undefined;
   for (const filename of DEFAULT_CONFIG_FILES) {
-    const filePath = resolve(process.cwd(), filename);
+    const filePath = normalizePath_r(resolve(process.cwd(), filename));
     if (!existsSync(filePath)) continue;
     resolvedPath = filePath;
     break;
@@ -134,25 +141,39 @@ export async function parseConfigFile(conf: object) {
   return {};
 }
 
-
-
 export async function resolveConfig(userConf: UserConfig) {
   const resolvedRoot = normalizePath_r(
     userConf.root ? resolve(userConf.root) : process.cwd(),
   )
   const packageCache: AnyObj = findNearestPackageData(resolvedRoot) || {}
-  const internalConf = {};
+  const internalConf = {
+    base:'/',
+    define:{}
+  };
   const conf = {
     ...userConf,
     ...internalConf,
   };
+
   const userConfig = await parseConfigFile(conf);
+  
+  const isProduction = process.env.NODE_ENV === 'production' || conf.mode === 'production'
+
+  const mode = userConfig.mode || conf.mode
+
   const resolved: ResolvedConfig = {
     ...conf,
     ...userConfig,
     cacheDir:'node_modules',
     plugins: [],
-    packageCache
+    packageCache,
+    env:{
+      ...loadEnv(conf.root!,conf.mode!),
+      BASE_URL:conf.base,
+      MODE: mode,
+      DEV:!isProduction,
+      PROD:isProduction
+    }
   };
   resolved.plugins = await resolvePlugins(resolved)
   return resolved;

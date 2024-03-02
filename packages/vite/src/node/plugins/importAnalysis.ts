@@ -6,10 +6,16 @@ import MagicString from "magic-string";
 
 export function importAnalysisPlugin(config: ResolvedConfig): Plugin {
   function _InjectEnvMeta() {
-    let meta = `import.meta.env = ${JSON.stringify({
-      name: "spp",
-      age: 30,
-    })};`;
+    const { env,define={} } = config
+    let meta = `import.meta.env = ${JSON.stringify(env)};`;
+    for (const key in define) {
+      if (key.startsWith(`import.meta.env.`)) {
+        const val = define[key]
+        meta += `${key} = ${
+          typeof val === 'string' ? val : JSON.stringify(val)
+        };`
+      }
+    }
     return meta;
   }
   return {

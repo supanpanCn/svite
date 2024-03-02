@@ -36,4 +36,4 @@ export interface Plugin {
   ) => Promise<TransformResult> | TransformResult;
 }
 
-export type PluginHooks = Omit<Required<Plugin>, "enforce" | "sequential">;
+export type PluginHooks = Omit<Required<Plugin>, "enforce" | "sequential"|"sequential"|"name">;

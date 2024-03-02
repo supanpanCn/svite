@@ -21,7 +21,7 @@ import { normalize } from "node:path/posix";
 import { existsSync, readFileSync } from "node:fs";
 import { type DepsOptimizer } from "../optimizer/index";
 import { findNearestPackageData } from "../packages";
-import { AnyObj } from "dep-types/helper";
+import { AnyObj } from "../types";
 import { hasESMSyntax } from "mlly";
 
 export const optionalPeerDepId = "__svite-optional-peer-dep";

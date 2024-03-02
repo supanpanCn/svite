@@ -1,6 +1,6 @@
 import { join, dirname } from "node:path";
 import { statSync, readFileSync } from "node:fs";
-import { AnyObj } from "dep-types/helper";
+import { AnyObj } from "./types";
 import { normalizePath_r } from './utils'
 
 export function findNearestPackageData(basedir: string,pkgName?:string): AnyObj | null {

@@ -26,7 +26,6 @@ export async function initDepsOptimizer(
 ) {
 
   let newDepsDiscovered = false
-  let enqueuedRerun: (() => void) | undefined
   let debounceProcessingHandle: NodeJS.Timeout | undefined
 
   const cachedMetadata = await loadCachedDepOptimizationMetadata(config);
@@ -41,8 +40,6 @@ export async function initDepsOptimizer(
       return (id: string) => id.startsWith(depsCacheDirPrefix);
     })(),
   };
-
-  
 
   depsOptimizerMap.set(config, depsOptimizer);
 
@@ -90,7 +87,6 @@ export async function initDepsOptimizer(
     if (!newDepsDiscovered) {
       return
     }
-    enqueuedRerun = undefined
     if (debounceProcessingHandle) clearTimeout(debounceProcessingHandle)
     debounceProcessingHandle = setTimeout(() => {
       debounceProcessingHandle = undefined

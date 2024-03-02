@@ -1,7 +1,7 @@
 import fsp from "node:fs/promises";
 import { getDepsCacheDir } from "./build";
 import { type ResolvedConfig } from "../config";
-import type { AnyObj } from "../../types/helper";
+import type { AnyObj } from "../types";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 import { getDepHash } from "./index";

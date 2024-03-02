@@ -1,5 +1,5 @@
 import { builtinModules } from "node:module";
-export const DEFAULT_CONFIG_FILES = ["svite.config.js"];
+export const DEFAULT_CONFIG_FILES = ["svite.config.ts"];
 export const dataUrlRE = /^\s*data:/i;
 export const httpUrlRE = /^(https?:)?\/\//;
 export const commentRE = /<!--.*?-->/gs;
