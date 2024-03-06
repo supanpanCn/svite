@@ -4,18 +4,26 @@ import { init, parse as parseImports } from "es-module-lexer";
 import type { ImportSpecifier } from "es-module-lexer";
 import MagicString from "magic-string";
 
+export function selectDefine(define:ResolvedConfig['define'],cb:(key:string,value:any)){
+  for (const key in define) {
+    if (key.startsWith(`import.meta.env.`)) {
+      const val = define[key]
+      if(typeof cb === 'function'){
+        cb(key,val)
+      }
+    }
+  }
+}
+
 export function importAnalysisPlugin(config: ResolvedConfig): Plugin {
   function _InjectEnvMeta() {
     const { env,define={} } = config
     let meta = `import.meta.env = ${JSON.stringify(env)};`;
-    for (const key in define) {
-      if (key.startsWith(`import.meta.env.`)) {
-        const val = define[key]
-        meta += `${key} = ${
-          typeof val === 'string' ? val : JSON.stringify(val)
-        };`
-      }
-    }
+    selectDefine(define,(key,val)=>{
+      meta += `${key} = ${
+        typeof val === 'string' ? val : JSON.stringify(val)
+      };`
+    })
     return meta;
   }
   return {

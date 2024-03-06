@@ -4,8 +4,9 @@ import { join } from 'node:path'
 import { readFileSync } from 'node:fs'
 import { tryStatSync } from './utils'
 
+export const prefix = "SVITE_";
+
 export function loadEnv(root: string,mode:string) {
-  const prefix = "SVITE_";
   const env: Record<string, string> = {};
   const envFiles = [`.env`, `.env.local`, `.env.${mode}.local`];
   const parsed = Object.fromEntries(

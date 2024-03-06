@@ -1,3 +1,5 @@
+import { IndexHtmlTransform } from './plugins/html'
+
 type LoadResult = string | NullValue;
 type TransformResult = null | string;
 
@@ -34,6 +36,8 @@ export interface Plugin {
     code: string,
     id: string
   ) => Promise<TransformResult> | TransformResult;
+  // 处理index.html
+  transformIndexHtml?:IndexHtmlTransform
 }
 
 export type PluginHooks = Omit<Required<Plugin>, "enforce" | "sequential"|"sequential"|"name">;
